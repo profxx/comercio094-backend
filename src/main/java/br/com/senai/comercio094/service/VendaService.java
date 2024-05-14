@@ -19,11 +19,22 @@ public class VendaService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    // Listar todas as vendas
+    public List<Venda> findAll(){
+        return vendaRepository.findAll();
+    }
+
+    // Mostrar uma venda específica
+    public Venda findById(Long id){
+        return vendaRepository.findById(id).orElse(null);
+    }
+
+    // Realizar uma venda
     public Venda realizarVenda(Venda venda){
-        // Define a data de hoje como a data da venda
+        // Inserir a data de hoje como data da venda
         venda.setDataVenda(LocalDate.now());
 
-        // Reduz a quantidade de produto no estoque
+        // Reduzir a quantidade de produto no estoque
         Produto produto = produtoRepository.findById(venda.getProdutoId()).orElse(null);
         if (produto == null){
             return null;
@@ -33,14 +44,11 @@ public class VendaService {
             produto.setQuantidade(quantidadeAtualizada);
             produtoRepository.save(produto);
 
-            // Incluir preço do produto no valor da venda
-            venda.setPrecoUnitario(produto.getPreco());
+            // Calcular o valor a pagar (total da venda)
+            venda.setPrecoTotal(quantidadeVendida * produto.getPreco());
 
-            // Salva a venda no banco de dados
+            // Salvar a venda no banco de dados
             return vendaRepository.save(venda);
         }
-    }
-    public List<Venda> findAll(){
-        return vendaRepository.findAll();
     }
 }
